@@ -304,11 +304,13 @@ abstract class BEWPI_Abstract_Invoice extends BEWPI_Abstract_Document {
 			$this->number = $this->get_next_invoice_number();
 		}
 
-		$pdf_path        = $this->get_rel_pdf_path() . '/' . $this->get_formatted_number() . '.pdf';
+		$pdf_path        = $this->get_rel_pdf_path() . '/' . $this->get_formatted_number() . '-1.pdf';
 		$this->full_path = WPI_ATTACHMENTS_DIR . '/' . $pdf_path;
 		$this->filename  = basename( $this->full_path );
+        $full_path1 = WPI_ATTACHMENTS_DIR . '/' . $pdf_path;
 
-		// update invoice data in db.
+
+        // update invoice data in db.
 		$order_id = $this->order->get_id();
 		update_post_meta( $order_id, '_bewpi_invoice_date', $this->date );
 		update_post_meta( $order_id, '_bewpi_invoice_number', $this->number );
@@ -318,7 +320,18 @@ abstract class BEWPI_Abstract_Invoice extends BEWPI_Abstract_Document {
 
 		parent::generate( $destination );
 
-		return $this->full_path;
+        $pdf_path        = $this->get_rel_pdf_path() . '/' . $this->get_formatted_number() . '-2.pdf';
+        $this->full_path = WPI_ATTACHMENTS_DIR . '/' . $pdf_path;
+        $this->filename  = basename( $this->full_path );
+        $full_path2= WPI_ATTACHMENTS_DIR . '/' . $pdf_path;
+
+
+        parent::generate( $destination );
+
+        $attachments[] = $full_path1;
+        array_push($attachments, $full_path2);
+
+        return $attachments;
 	}
 
 	/**

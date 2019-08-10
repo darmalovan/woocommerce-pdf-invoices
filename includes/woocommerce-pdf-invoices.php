@@ -564,7 +564,13 @@ if ( ! class_exists( 'BE_WooCommerce_PDF_Invoices' ) ) {
 			}
 
 			// Attach invoice to email.
-			$attachments[] = $full_path;
+//            $pdf_path1        = WPI_ATTACHMENTS_DIR . '/' . '2019' . '/' . '00008-2019' . '.pdf';
+//            $pdf_path2        = WPI_ATTACHMENTS_DIR . '/' . '2019' . '/' . '00010-2019' . '.pdf';
+//
+//            $attachments[] = $pdf_path1;
+//            array_push($attachments, $pdf_path2);
+
+            $attachments = $full_path;
 
 			/**
 			 * Check if current email is a customer email.

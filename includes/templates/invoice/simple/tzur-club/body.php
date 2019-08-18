@@ -1,3 +1,44 @@
+<?php
+/**
+ * PDF invoice template body.
+ *
+ * This template can be overridden by copying it to youruploadsfolder/woocommerce-pdf-invoices/templates/invoice/simple/yourtemplatename/body.php.
+ *
+ * HOWEVER, on occasion WooCommerce PDF Invoices will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
+ *
+ * @author  Bas Elbers
+ * @package WooCommerce_PDF_Invoices/Templates
+ * @version 0.0.1
+ */
+
+$templater = WPI()->templater();
+$order = $templater->order;
+$invoice = $templater->invoice;
+$line_items = $order->get_items('line_item');
+$formatted_shipping_address = $order->get_formatted_shipping_address();
+$formatted_billing_address = $order->get_formatted_billing_address();
+$columns = $invoice->get_columns();
+$color = $templater->get_option('bewpi_color_theme');
+$terms = $templater->get_option('bewpi_terms');
+
+// custom data
+
+//$passport_number = $invoice->passport_number;
+
+//echo $invoice;
+
+//$passport_number = $invoice->get_passport_number();
+//echo $passport_number;
+$passport_number = '1111111';
+?>
+
+2222
+
+
 <div class="pdfPage"
      style="transition: border-color 200ms ease-in-out 0s; width: 1125px; height: 796px; background-color: white; display: inline-block; border-color: rgb(175, 175, 175);">
   <div class="pdfHeader" style="width: 1123px; position: relative; height: 100px;">
@@ -53,7 +94,7 @@
     <div tabindex="1" class="PDFElement" id="pdfField_14"
          style="left: 418px; top: 432.6px; z-index: 500; position: absolute; font-size: 14px; width: 300px;">
       <div class="elementContent"><p style="vertical-align: top;"></p>
-        <p style="text-align: center;"><strong>Passport Number:</strong> <?php echo $passportNumber; ?></p>
+        <p style="text-align: center;"><strong>Passport Number:</strong> <?php echo $passport_number; ?></p>
         <p></p></div>
     </div>
     <div tabindex="1" class="PDFElement" id="pdfField_13"

@@ -31,7 +31,8 @@
   "require": {
     "php": ">=5.2.14",
     "xrstf/composer-php52": "1.*",
-    "mpdf/mpdf": "dev-mpdf"
+    "mpdf/mpdf": "dev-mpdf",
+    "dompdf/dompdf": "^0.8.3"
   },
   "require-dev": {
     "wp-coding-standards/wpcs": "dev-master"

@@ -8,6 +8,9 @@
  * @version     1.0.0
  */
 
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
 defined( 'ABSPATH' ) or exit;
 
 if ( ! class_exists( 'BEWPI_Abstract_Document' ) ) {
@@ -202,9 +205,19 @@ if ( ! class_exists( 'BEWPI_Abstract_Document' ) ) {
 				$name = $this->filename;
 			}
 
-			$mpdf->Output( $name, $destination );
+            $options = new Options();
+            $options->set('isRemoteEnabled', true);
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($html['body']);
 
-			if ( 'F' !== $destination ) {
+
+            $dompdf->render();
+
+            $output = $dompdf->output();
+            file_put_contents($this->full_path, $output);
+
+
+            if ( 'F' !== $destination ) {
 				exit;
 			}
 		}

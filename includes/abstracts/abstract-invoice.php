@@ -23,7 +23,7 @@ abstract class BEWPI_Abstract_Invoice extends BEWPI_Abstract_Document {
 	 */
 	protected $number;
 
-	/**
+    /**
 	 * MySQL invoice date.
 	 *
 	 * @var string
@@ -45,7 +45,7 @@ abstract class BEWPI_Abstract_Invoice extends BEWPI_Abstract_Document {
 	 */
 	public $columns_count;
 
-	/**
+    /**
 	 * Colspan data to outline products table columns.
 	 *
 	 * @var int
@@ -282,6 +282,50 @@ abstract class BEWPI_Abstract_Invoice extends BEWPI_Abstract_Document {
 		return intval( $wpdb->get_var( $query ) ); // db call ok; no-cache ok. WPCS: unprepared SQL OK.
 	}
 
+    public function get_pdf_items() {
+        $res = new stdClass();
+        preg_match('/-([1-9]+)\.pdf$/', $this->full_path, $re);
+
+        if (count($re) < 2) {
+          return null;
+        }
+
+        $pdfNum = $re[1];
+
+        $columnsData = $this->get_columns_data();
+        $orderDescription = $columnsData[0]["description"];
+        $descriptionItems = explode("\n", $orderDescription);
+
+        $indexPdfNum = 1;
+        foreach ($descriptionItems as $key => $value) {
+            $descriptionItem = explode(":", $value);
+            if (strpos($descriptionItem[0], 'מספר דרכון') !== false) {
+                if ($indexPdfNum == $pdfNum) {
+                    $res->passport_number = $descriptionItem[1];
+                    break;
+                }
+                $indexPdfNum++;
+            }
+
+        }
+
+        $indexPdfNum = 1;
+        foreach ($descriptionItems as $key => $value) {
+            $descriptionItem = explode(":", $value);
+            if (strpos($descriptionItem[0], 'שם נוסע') !== false) {
+                if ($indexPdfNum == $pdfNum) {
+                    $res->passenger_name = $descriptionItem[1];
+                    break;
+
+                }
+                $indexPdfNum++;
+            }
+
+        }
+
+        return $res;
+    }
+
 	/**
 	 * Save invoice.
 	 *
@@ -304,32 +348,40 @@ abstract class BEWPI_Abstract_Invoice extends BEWPI_Abstract_Document {
 			$this->number = $this->get_next_invoice_number();
 		}
 
-		$pdf_path        = $this->get_rel_pdf_path() . '/' . $this->get_formatted_number() . '-1.pdf';
-		$this->full_path = WPI_ATTACHMENTS_DIR . '/' . $pdf_path;
-		$this->filename  = basename( $this->full_path );
-        $full_path1 = WPI_ATTACHMENTS_DIR . '/' . $pdf_path;
-
-
         // update invoice data in db.
-		$order_id = $this->order->get_id();
-		update_post_meta( $order_id, '_bewpi_invoice_date', $this->date );
-		update_post_meta( $order_id, '_bewpi_invoice_number', $this->number );
-		update_post_meta( $order_id, '_bewpi_invoice_pdf_path', $pdf_path );
+        $pdf_path = $this->get_rel_pdf_path() . '/' . $this->get_formatted_number() . '-1.pdf';
+        $order_id = $this->order->get_id();
+        update_post_meta( $order_id, '_bewpi_invoice_date', $this->date );
+        update_post_meta( $order_id, '_bewpi_invoice_number', $this->number );
+        update_post_meta( $order_id, '_bewpi_invoice_pdf_path', $pdf_path );
 
-		do_action( 'bewpi_before_document_generation', $this->type, $order_id );
+        do_action( 'bewpi_before_document_generation', $this->type, $order_id );
 
-		parent::generate( $destination );
+        $attachments[] = [];
 
-        $pdf_path        = $this->get_rel_pdf_path() . '/' . $this->get_formatted_number() . '-2.pdf';
-        $this->full_path = WPI_ATTACHMENTS_DIR . '/' . $pdf_path;
-        $this->filename  = basename( $this->full_path );
-        $full_path2= WPI_ATTACHMENTS_DIR . '/' . $pdf_path;
+        $columnsData = $this->get_columns_data();
+        $orderDescription = $columnsData[0]["description"];
+        $descriptionItems = explode("\n", $orderDescription);
 
+        $pdfNum = 1;
+        // Loop on all the order items
+        foreach ($descriptionItems as $key => $value) {
+            $descriptionItem = explode(":", $value);
+            // attach a PDF for every passport number
+            if (strpos($descriptionItem[0], 'מספר דרכון') !== false) {
 
-        parent::generate( $destination );
+                $pdf_path = $this->get_rel_pdf_path() . '/' . $this->get_formatted_number() . '-' . $pdfNum . '.pdf';
+                $this->full_path = WPI_ATTACHMENTS_DIR . '/' . $pdf_path;
+                $this->filename = basename($this->full_path);
+                $full_path = WPI_ATTACHMENTS_DIR . '/' . $pdf_path;
 
-        $attachments[] = $full_path1;
-        array_push($attachments, $full_path2);
+                parent::generate($destination);
+
+                array_push($attachments, $full_path);
+
+                $pdfNum++;
+            }
+        }
 
         return $attachments;
 	}
